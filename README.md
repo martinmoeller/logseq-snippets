@@ -19,11 +19,18 @@ A simple and effective text expansion plugin for Logseq.
     ```
 3.  Type `gh` followed by a space or enter key in any block, and it will expand to `GitHub`.
 
+![Demo](https://raw.githubusercontent.com/martinmoeller/logseq-snippets/main/demo.gif)
+
 ## Installation
 
 ### Marketplace
 
-TBD - Will be available in Logseq Marketplace soon.
+1.  Click on the 3 dots in the top right corner.
+2.  Go to **Settings > Advanced**.
+3.  Ensure **Plug-in system** is enabled.
+4.  Go to **Plugins > Marketplace**.
+5.  Search for "Logseq Snippets".
+6.  Click **Install**.
 
 ### Manual
 
@@ -31,6 +38,13 @@ TBD - Will be available in Logseq Marketplace soon.
 2.  Unzip the file.
 3.  In Logseq, turn on Developer Mode.
 4.  Click "Load unpacked plugin" and select the unzipped folder.
+
+## Configuration
+
+The plugin is configured via the Logseq plugin settings.
+
+-   **Snippets**: A JSON-like or custom format list of triggers and replacements.
+    -   Format: `trigger ;; replacement`
 
 ## Author
 

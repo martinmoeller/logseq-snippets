@@ -1,7 +1,7 @@
 {
     "name": "logseq-snippets",
     "private": true,
-    "version": "0.1.6",
+    "version": "0.2.1",
     "author": "Martin Möller <moellervdm@gmail.com>",
     "type": "module",
     "description": "Logseq Snippets Plugin",
@@ -19,12 +19,23 @@
         "prebuild": "node scripts/bump-version.js",
         "dev": "vite",
         "build": "tsc && vite build",
-        "preview": "vite preview"
+        "preview": "vite preview",
+        "lint": "eslint src --ext .ts,.tsx",
+        "lint:fix": "eslint src --ext .ts,.tsx --fix",
+        "format": "prettier --write \"src/**/*.{ts,tsx}\"",
+        "format:check": "prettier --check \"src/**/*.{ts,tsx}\"",
+        "bump:patch": "node scripts/bump-version.js patch",
+        "bump:minor": "node scripts/bump-version.js minor",
+        "bump:major": "node scripts/bump-version.js major"
     },
     "dependencies": {
         "@logseq/libs": "^0.0.17"
     },
     "devDependencies": {
+        "@typescript-eslint/eslint-plugin": "^6.0.0",
+        "@typescript-eslint/parser": "^6.0.0",
+        "eslint": "^8.45.0",
+        "prettier": "^3.0.0",
         "typescript": "^5.0.2",
         "vite": "^4.3.2"
     }
