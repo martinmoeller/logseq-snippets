@@ -9,85 +9,110 @@ interface Snippet {
 }
 
 export async function registerReplacer() {
-    const mainContentContainer = top?.document.getElementById('app-container');
-    if (!mainContentContainer) {
-        console.error('[Snippets] Could not find app-container');
+    const doc = top?.document || document;
+    if (!doc) {
         return;
     }
 
-    mainContentContainer.addEventListener('keyup', async (e: any) => {
+    // Handle Enter on keydown (Capture Phase)
+    doc.addEventListener('keydown', async (e: any) => {
         const target = e.target as HTMLElement;
         if (target.tagName !== 'TEXTAREA') return;
 
-        // We only care about Space or Enter for expansion trigger
-        if (e.key !== ' ' && e.key !== 'Enter') return;
+        if (e.key === 'Enter') {
+            // Debug: Show if content ends with any trigger
+            const content = (target as HTMLTextAreaElement).value;
 
-        // Get content directly from the textarea
-        const content = (target as HTMLTextAreaElement).value;
+            const snippets = getSnippets();
 
-        const currentBlock = await logseq.Editor.checkEditing();
-        if (!currentBlock) return;
+            const match = snippets.find(s => content.endsWith(s.trigger));
+            if (match) {
+                await handleEnter(e, target as HTMLTextAreaElement);
+            }
+        }
+    }, { capture: true });
 
-        await checkAndReplace(currentBlock as string, content);
-    });
+    // Handle punctuation/space on 'input' event (Capture Phase)
+    // 'input' fires when value changes. e.data contains the inserted char.
+    doc.addEventListener('input', async (e: any) => {
+        const target = e.target as HTMLElement;
+        if (target.tagName !== 'TEXTAREA') return;
+
+        const char = e.data;
+        if (!char) return; // e.g. deleteContentBackward
+
+        if ([' ', ',', '.', ';'].includes(char)) {
+            await handlePunctuation(char, target as HTMLTextAreaElement);
+        }
+    }, { capture: true });
 }
 
-async function checkAndReplace(uuid: string, content: string) {
+async function handleEnter(e: any, target: HTMLTextAreaElement) {
+    const content = target.value;
     const snippets = getSnippets();
-
-    // We need to find a trigger at the end of the string.
-    // The trigger is "keyword" + " " or "keyword" + "\n"
-    // content ends with one of these.
 
     for (const { trigger, replacement } of snippets) {
         if (!trigger) continue;
 
-        // We use a regex to ensure we match the trigger as a whole word boundary if possible, 
-        // but typically we just check if it ends with " trigger "
-        // Regex: /(?:^|\s)trigger\s$/ (preceded by start or space, followed by space at end)
-        // But simplified check: content ends with ` ${trigger} ` or just starts with `${trigger} `
-        // or simply: does it end with `${trigger} `?
+        if (content.endsWith(trigger)) {
+            const boundaryCheck = checkBoundary(content, trigger, 0);
+            if (boundaryCheck) {
+                e.preventDefault();
+                e.stopPropagation();
 
-        // User requirement: "Ersetzung nur am Wortende triggert (Regex: \bshortcut\s$)"
-        // \b matches word boundary.
+                const currentBlock = await logseq.Editor.checkEditing();
+                if (!currentBlock) return;
+                const uuid = typeof currentBlock === 'string' ? currentBlock : currentBlock.uuid;
 
-        // We construct regex dynamically. Escape trigger first?
-        const escapedTrigger = trigger.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const regex = new RegExp(`\\b${escapedTrigger}\\s$`); // \s matches space/newline
-
-        // Test if content matches
-        if (regex.test(content)) {
-            // Calculate new content
-            // We replace the match. 
-            // We need to know the length of the match to slice correctly.
-            // The match is " trigger " (with leading boundary?) No, \b matches position.
-            // So it matches "trigger " at the end.
-
-            // Wait, \s matches the last char.
-            // If content is "foo bar ", regex matches "bar "
-
-            // We want to replace "trigger " with "replacement ".
-            // Note: we might want to keep the trailing space/newline?
-            // Usually text expansion keeps the delimiter.
-            // User said: "Füge stattdessen den Erweiterungstext an der Cursor-Position ein"
-
-            // Let's replace the triggered part.
-            // content "hello gh " -> "hello GitHub "
-
-            // We execute regex to get match details if needed, or just slice.
-            // Since we know it ends with trigger + space, and \b ensures it's a word.
-
-            const triggerLen = trigger.length + 1; // +1 for the space/newline char
-
-            // Check if the last char is actually what we think (could be \n or space)
-            const lastChar = content.slice(-1);
-
-            const newText = content.slice(0, -triggerLen) + replacement + lastChar;
-
-            await logseq.Editor.updateBlock(uuid, newText);
-            return; // Stop after first match
+                const newText = content.slice(0, -trigger.length) + replacement;
+                await logseq.Editor.updateBlock(uuid, newText);
+                return;
+            }
         }
     }
+}
+
+async function handlePunctuation(char: string, target: HTMLTextAreaElement) {
+    const content = target.value;
+    const snippets = getSnippets();
+    const key = char;
+
+    for (const { trigger, replacement } of snippets) {
+        if (!trigger) continue;
+
+        const suffix = trigger + key;
+        if (content.endsWith(suffix)) {
+            const boundaryCheck = checkBoundary(content, trigger, key.length);
+            if (boundaryCheck) {
+                const currentBlock = await logseq.Editor.checkEditing();
+                if (!currentBlock) return;
+                const uuid = typeof currentBlock === 'string' ? currentBlock : currentBlock.uuid;
+
+                const triggerLen = trigger.length + key.length;
+                const newText = content.slice(0, -triggerLen) + replacement + key;
+                await logseq.Editor.updateBlock(uuid, newText);
+                return;
+            }
+        }
+    }
+}
+
+function checkBoundary(content: string, trigger: string, offsetFromEnd: number): boolean {
+    const triggerStart = content.length - offsetFromEnd - trigger.length;
+    if (triggerStart <= 0) return true; // Start of line
+
+    const charBefore = content[triggerStart - 1];
+    const triggerFirst = trigger[0];
+
+    // If both are word characters, it means we are inside a word -> no match
+    if (isWordChar(triggerFirst) && isWordChar(charBefore)) {
+        return false;
+    }
+    return true;
+}
+
+function isWordChar(char: string) {
+    return /^[a-zA-Z0-9_]$/.test(char);
 }
 
 function getSnippets(): Snippet[] {
