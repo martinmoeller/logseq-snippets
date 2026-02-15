@@ -149,16 +149,11 @@ phone ;; +1-555-0123
 sig ;; Best regards,\nYour Name\nYour Title
 ```
 
-## 📸 Screenshots
+## 📸 Screenshot
 
-### Settings Panel
-![Settings Panel](./screenshots/settings.png)
+![Logseq Snippets in Action](./screenshots/screenshot.png)
 
-### Snippet Expansion
-![Snippet Expansion](./screenshots/expansion.png)
-
-### Import/Export
-![Import Export](./screenshots/import-export.png)
+The screenshot shows the plugin settings panel with example snippets, including multi-line templates, dynamic variables, and various configuration options.
 
 ## 🛠️ Development
 
