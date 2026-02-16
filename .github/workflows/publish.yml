@@ -8,6 +8,9 @@ on:
 env:
   PLUGIN_NAME: logseq-snippets
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
