@@ -5,6 +5,37 @@ All notable changes to the Logseq Snippets plugin will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **Snippet Manager**: modern dialog to search, create, edit and delete snippets, with variable chips, duplicate highlighting, light/dark theme and autosave
+- Command palette entry `Snippets: Manage snippets`
+- **Expand On** setting: choose Space, punctuation and/or Tab as expansion keys
+- **Enter Key** setting: expand only, expand and create a new block, or never expand on Enter
+- **Trigger Prefix** setting (e.g. `;gh`) to rule out accidental expansions
+- **Match Capitalisation** setting: `Gm` → capitalised, `GM` → ALL CAPS
+- Triggers now expand at the caret position, not only at the end of the block
+- **Backspace right after an expansion reverts it** to the typed trigger
+- No expansion inside inline code, code blocks, URLs, `[[page refs]]`, `((block refs))` and `{{macros}}`
+
+### Changed
+- Single toolbar button opens the manager; import/export moved into it
+- Import now asks explicitly whether to append or replace
+- Code restructured (`logic/snippets.ts`, `logic/replacer.ts`, `ui/`), React-free `main.ts`, minified build
+- Longest matching trigger wins when several match
+- Text is now inserted directly at the caret via the browser's editing pipeline instead of rewriting the whole block with `updateBlock`: no lost keystrokes, no flicker, native undo (Ctrl+Z) works
+- Settings grouped into Expansion / Notifications / Advanced; the raw snippet text moved to Advanced
+- Notifications now default to *errors-only* (existing choices are kept)
+- Removed the "Warn About Duplicates" setting (duplicates are shown in the manager)
+
+### Fixed
+- Enter no longer expands a snippet while Logseq's autocomplete, slash-command menu or date picker is open
+- No accidental expansions during IME composition or when pasting
+- `{clipboard}` is read via the host window, so it works even though the plugin iframe has no focus
+- Import always replaced existing snippets (the confirmation was never evaluated)
+- `{date}` / `{datetime}` used UTC and could show the wrong day around midnight
+- `{cursor}` marker was left in the text; the caret is now placed at the marker
+
 ## [0.2.1] - 2026-02-15
 
 ### Fixed

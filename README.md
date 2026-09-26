@@ -10,20 +10,24 @@ A powerful text expansion plugin for Logseq with dynamic variables, multi-line s
 
 - **Instant expansion**: Type a trigger followed by space, punctuation, or Enter
 - **Word boundaries**: Smart detection prevents false triggers
+- **Context-aware**: Never expands inside code, URLs, `[[page refs]]`, `((block refs))` or `{{macros}}`
+- **Instant undo**: Press Backspace right after an expansion to get your trigger back (Ctrl+Z works too)
 - **Case sensitivity**: Optional case-sensitive or case-insensitive matching
 
 ### 📝 Advanced Snippet Capabilities
 
 - **Multi-line snippets**: Use `\n` to create complex templates
 - **Dynamic variables**: Insert `{date}`, `{time}`, `{datetime}`, `{clipboard}`
-- **Cursor positioning**: Use `{cursor}` marker to place cursor after expansion
-- **Comments**: Organize snippets with `#` prefix
+- **Cursor positioning**: Use `{cursor}` to place the caret exactly where you want it
+- **Mid-line expansion**: Triggers expand at the caret, not just at the end of a block
+- **Comments**: Organize snippets with `#` prefix (raw settings editor)
 
 ### 🎨 Customization
 
-- **Import/Export**: Share snippet collections via toolbar buttons
+- **Snippet Manager**: Search, add, edit and delete snippets in a modern dialog (light & dark theme)
+- **Import/Export**: Append or replace from a file, export with one click
 - **Configurable notifications**: Choose always / never / errors-only
-- **Duplicate detection**: Warns about conflicting triggers
+- **Duplicate detection**: Conflicting triggers are highlighted in the manager
 - **Performance optimized**: Smart caching for instant expansion
 
 ## 📦 Installation
@@ -34,7 +38,7 @@ A powerful text expansion plugin for Logseq with dynamic variables, multi-line s
 2. Go to `Settings` → `Plugins` → `Marketplace`
 3. Search for "Logseq Snippets"
 4. Click `Install`
-5. Configure your snippets in `Settings` → `Plugin Settings` → `Logseq Snippets`
+5. Open the Snippet Manager via the ✂️ toolbar icon or the command palette (`Snippets: Manage snippets`)
 
 ### Manual Installation
 
@@ -49,9 +53,11 @@ A powerful text expansion plugin for Logseq with dynamic variables, multi-line s
 
 ### Basic Snippets
 
-1. Go to `Settings` → `Plugin Settings` → `Logseq Snippets`
-2. Add snippets using format: `trigger ;; replacement`
+1. Click the ✂️ toolbar icon (or run `Snippets: Manage snippets` from the command palette)
+2. Click **New**, enter a trigger and the replacement text – changes are saved automatically
 3. Type the trigger followed by space, punctuation, or Enter
+
+Prefer plain text? The raw `trigger ;; replacement` format is still editable in `Settings` → `Plugin Settings` → `Logseq Snippets`.
 
 **Examples:**
 ```
@@ -97,12 +103,15 @@ note ;; > **Note**: {cursor}
 
 ## ⚙️ Settings
 
-| Setting | Description | Default | Options |
-|---------|-------------|---------|---------|
-| **Snippets** | Define your snippets (one per line) | Example snippets | - |
-| **Case Sensitive** | Make triggers case-sensitive | Off | On/Off |
-| **Show Expansion Notifications** | Control when to show notifications | Always | Always / Never / Errors-only |
-| **Warn About Duplicates** | Log warnings for duplicate triggers | On | On/Off |
+| Setting | Description | Default |
+|---------|-------------|---------|
+| **Expand On** | Keys that expand a trigger: Space, punctuation (`, . ;`), Tab | Space, punctuation |
+| **Enter Key** | *Expand only*, *Expand and create a new block*, or *Never expand on Enter* | Expand only |
+| **Trigger Prefix** | Only expand triggers typed with this prefix, e.g. `;` → `;gh` | Off (empty) |
+| **Case Sensitive** | Only expand triggers typed with exactly the same case | Off |
+| **Match Capitalisation** | `Gm` → first letter capitalised, `GM` → ALL CAPS (only when case-insensitive) | Off |
+| **Show Expansion Notifications** | Always / Errors-only / Never | Errors-only |
+| **Snippets (Raw Text)** | Plain-text version of the Snippet Manager (`trigger ;; replacement`) | Example snippets |
 
 ### Notification Options
 
@@ -194,9 +203,9 @@ npm run format:check
 - Check if case sensitivity is affecting matching
 - Verify the trigger doesn't contain typos
 
-**Duplicate trigger warnings?**
+**Duplicate trigger badges?**
 - Check for triggers that differ only in case when case-sensitivity is off
-- Use comments to organize and review your snippets
+- The longest matching trigger wins; among equal triggers the first one is used
 
 **Variables not working?**
 - `{clipboard}` requires clipboard permissions in your browser
